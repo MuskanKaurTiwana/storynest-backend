@@ -1,6 +1,7 @@
+// controllers/blogController.js
 const Blog = require('../models/Blog');
 
-// Fetch all blogs
+// Get all blogs (public)
 exports.getAllBlogs = async (req, res) => {
     try {
         const blogs = await Blog.find().populate('author', 'username');
@@ -10,11 +11,16 @@ exports.getAllBlogs = async (req, res) => {
     }
 };
 
-// Fetch single blog
+// ✅ Updated: Protected get-by-id for edit page
 exports.getBlogById = async (req, res) => {
     try {
         const blog = await Blog.findById(req.params.id).populate('author', 'username').lean();
         if (!blog) return res.status(404).json({ message: 'Blog not found' });
+
+        // ✅ Only allow author to fetch blog for editing
+        if (blog.author._id.toString() !== req.userId) {
+            return res.status(403).json({ message: 'Unauthorized access to blog' });
+        }
 
         res.json(blog);
     } catch (error) {
@@ -23,38 +29,32 @@ exports.getBlogById = async (req, res) => {
     }
 };
 
-
-// Update blog
+// Update blog (already correct)
 exports.updateBlog = async (req, res) => {
     const { title, content } = req.body;
     try {
         const blog = await Blog.findById(req.params.id);
         if (!blog) return res.status(404).json({ message: "Blog not found" });
 
-        // Optional: Author check (only author can edit)
         if (!blog.author || blog.author.toString() !== req.userId) {
             return res.status(403).json({ message: "Unauthorized" });
         }
-
 
         blog.title = title || blog.title;
         blog.content = content || blog.content;
         const updatedBlog = await blog.save();
         res.json(updatedBlog);
     } catch (error) {
-    console.error(error);  // Add this line to print the actual error in your terminal
-    res.status(500).json({ message: "Server Error" });
+        console.error(error);
+        res.status(500).json({ message: "Server Error" });
     }
-
 };
 
-// Delete blog
 exports.deleteBlog = async (req, res) => {
     try {
         const blog = await Blog.findById(req.params.id);
         if (!blog) return res.status(404).json({ message: "Blog not found" });
 
-        // Optional: Author check (only author can delete)
         if (blog.author.toString() !== req.userId) {
             return res.status(403).json({ message: "Unauthorized" });
         }
@@ -65,4 +65,5 @@ exports.deleteBlog = async (req, res) => {
         res.status(500).json({ message: "Server Error" });
     }
 };
+
 
