@@ -5,7 +5,7 @@ const dotenv = require('dotenv');
 
 const authRoutes = require('./routes/auth');
 const blogRoutes = require('./routes/blogs');
-const commentRoutes = require('./routes/comment'); // if you have comments
+const commentRoutes = require('./routes/comments'); 
 
 dotenv.config();
 
