@@ -4,7 +4,7 @@ const cors = require('cors');
 const dotenv = require('dotenv');
 
 const authRoutes = require('./routes/auth');
-const blogRoutes = require('./routes/blog');
+const blogRoutes = require('./routes/blogs');
 const commentRoutes = require('./routes/comment'); // if you have comments
 
 dotenv.config();
