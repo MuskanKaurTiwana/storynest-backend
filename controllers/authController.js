@@ -21,33 +21,32 @@ const loginUser = async (req, res) => {
     console.log('User Found:', user);
     if (!user) return res.status(400).json({ message: 'Invalid credentials' });
 
-
     const isMatch = await bcrypt.compare(password, user.password);
     console.log('Password Match:', isMatch);
     if (!isMatch) return res.status(400).json({ message: 'Invalid credentials' });
 
     const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '1d' });
 
-    
-    console.log('Sending Login Response:', {
-      token,
-      user: { id: user._id.toString(), username: user.username }
+    // ✅ Set the token as a cookie (cross-origin safe)
+    res.cookie('token', token, {
+      httpOnly: true,
+      sameSite: 'None',  // Required for cross-origin cookies
+      secure: true,      // Required for HTTPS (Netlify + Render)
     });
 
+    console.log('Sending Login Response with Cookie');
     res.status(200).json({
-      token,
       user: {
         id: user._id.toString(),
-        username: user.username
+        username: user.username,
       }
     });
-
-
 
   } catch (err) {
     res.status(500).json({ message: 'Login failed', error: err });
   }
 };
+
 
 
 module.exports = { registerUser, loginUser };
