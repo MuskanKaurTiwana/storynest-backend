@@ -24,7 +24,7 @@ router.post('/', authMiddleware, async (req, res) => {
 router.get('/', blogController.getAllBlogs);
 
 // ✅ Updated: Protect get-by-id route
-router.get('/:id', authMiddleware, blogController.getBlogById);
+router.get('/:id', blogController.getBlogById);
 
 router.put('/:id', authMiddleware, blogController.updateBlog);
 router.delete('/:id', authMiddleware, blogController.deleteBlog);
