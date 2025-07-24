@@ -10,7 +10,12 @@ const commentRoutes = require('./routes/comments');
 dotenv.config();
 const app = express();
 
-app.use(cors());
+// ✅ Proper CORS setup for Netlify frontend
+app.use(cors({
+  origin: 'https://silver-arithmetic-660977.netlify.app',
+  credentials: true,
+}));
+
 app.use(express.json());
 
 const PORT = process.env.PORT || 5000;
@@ -19,7 +24,7 @@ mongoose.connect(process.env.MONGO_URI)
   .then(() => {
     console.log('MongoDB connected');
 
-    // Mount routes only after DB connects
+    // Routes
     app.use('/api/auth', authRoutes);  
     app.use('/api/blogs', blogRoutes);
     app.use('/api/comments', commentRoutes);
@@ -32,6 +37,7 @@ mongoose.connect(process.env.MONGO_URI)
   .catch(err => {
     console.error('MongoDB connection error:', err);
   });
+
 
 
 
