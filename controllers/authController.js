@@ -25,31 +25,23 @@ const loginUser = async (req, res) => {
   const { email, password } = req.body;
   try {
     const user = await User.findOne({ email });
-    console.log('User Found:', user);
-
     if (!user) {
       return res.status(400).json({ message: 'Invalid email or password' });
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
-    console.log('Password Match:', isMatch);
-
     if (!isMatch) {
       return res.status(400).json({ message: 'Invalid email or password' });
     }
 
     const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '1d' });
 
-    // ✅ Set the token in an HTTP-only cookie
-    res.cookie('token', token, {
-      httpOnly: true,
-      secure: true,          // Required for cross-origin HTTPS (like Netlify + Render)
-      sameSite: 'None',      // Required for cross-origin requests
-      maxAge: 24 * 60 * 60 * 1000, // 1 day
-    });
+    // ❌ Remove this cookie setup
+    // res.cookie('token', token, { ... });
 
-    console.log('Login Successful: Cookie Sent');
+    // ✅ Send token in JSON
     res.status(200).json({
+      token,
       user: {
         id: user._id.toString(),
         username: user.username,
@@ -61,6 +53,7 @@ const loginUser = async (req, res) => {
     res.status(500).json({ message: 'Login failed', error: err.message });
   }
 };
+
 
 module.exports = { registerUser, loginUser };
 

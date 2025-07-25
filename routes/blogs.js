@@ -1,8 +1,9 @@
+// routes/blog.js
 const express = require('express');
 const router = express.Router();
 const authMiddleware = require('../middleware/authMiddleware');
 const blogController = require('../controllers/blogController');
-const Blog = require('../models/Blog'); // Add this to query Blog model directly if needed
+const Blog = require('../models/Blog');
 
 // Create blog
 router.post('/', authMiddleware, async (req, res) => {
@@ -20,16 +21,14 @@ router.post('/', authMiddleware, async (req, res) => {
     }
 });
 
-// Get all blogs
 router.get('/', blogController.getAllBlogs);
 
-// Update a blog
-router.put('/:id', authMiddleware, blogController.updateBlog);
+// ✅ Updated: Protect get-by-id route
+router.get('/:id', blogController.getBlogById);
 
-// Delete a blog
+router.put('/:id', authMiddleware, blogController.updateBlog);
 router.delete('/:id', authMiddleware, blogController.deleteBlog);
 
-// ✅ Get blogs by user
 router.get('/user/:userId', async (req, res) => {
     try {
         const blogs = await Blog.find({ author: req.params.userId });
@@ -40,9 +39,7 @@ router.get('/user/:userId', async (req, res) => {
     }
 });
 
-// Get a blog by ID
-router.get('/:id', blogController.getBlogById);
-
 module.exports = router;
+
 
 

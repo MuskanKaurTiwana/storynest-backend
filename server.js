@@ -5,38 +5,48 @@ const dotenv = require('dotenv');
 
 const authRoutes = require('./routes/auth');
 const blogRoutes = require('./routes/blogs');
-const commentRoutes = require('./routes/comments');
+
+const commentRoutes = require('./routes/comments'); 
+
 
 dotenv.config();
+
 const app = express();
 
-// ✅ Proper CORS setup for Netlify frontend
+// ✅ Netlify frontend domain for CORS
+const allowedOrigins = ['https://silver-arithmetic-660977.netlify.app'];
+
 app.use(cors({
-  origin: 'https://silver-arithmetic-660977.netlify.app',
+  origin: allowedOrigins,
   credentials: true,
+  exposedHeaders: ['Authorization'],
 }));
 
 app.use(express.json());
 
 const PORT = process.env.PORT || 5000;
 
-mongoose.connect(process.env.MONGO_URI)
-  .then(() => {
-    console.log('MongoDB connected');
+// ✅ MongoDB connection and server start
+mongoose.connect(process.env.MONGO_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+})
+.then(() => {
+  console.log('✅ MongoDB connected');
 
-    // Routes
-    app.use('/api/auth', authRoutes);  
-    app.use('/api/blogs', blogRoutes);
-    app.use('/api/comments', commentRoutes);
+  // ✅ Route middlewares
+  app.use('/api/auth', authRoutes);  
+  app.use('/api/blogs', blogRoutes);
+  app.use('/api/comments', commentRoutes);
 
-    app.listen(PORT, () => {
-      console.log(`Server running on port ${PORT}`);
-    });
-
-  })
-  .catch(err => {
-    console.error('MongoDB connection error:', err);
+  app.listen(PORT, () => {
+    console.log(`🚀 Server running on port ${PORT}`);
   });
+})
+.catch(err => {
+  console.error('❌ MongoDB connection error:', err);
+});
+
 
 
 
