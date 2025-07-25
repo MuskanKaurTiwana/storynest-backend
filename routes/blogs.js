@@ -7,7 +7,13 @@ const Blog = require('../models/Blog');
 // ✅ Public: Get all blogs
 router.get('/', blogController.getAllBlogs);
 
-// ✅ Public: Get blogs by user ID (placed before /:id!)
+// ✅ Public: Get blog by ID for viewing
+router.get('/:id', blogController.getBlogById);
+
+// ✅ Protected: Get blog by ID for editing
+router.get('/edit/:id', authMiddleware, blogController.getBlogForEdit);
+
+// ✅ Public: Get blogs by user ID (must be placed before routes with params like /:id)
 router.get('/user/:userId', async (req, res) => {
     try {
         const blogs = await Blog.find({ author: req.params.userId });
@@ -17,9 +23,6 @@ router.get('/user/:userId', async (req, res) => {
         res.status(500).json({ error: 'Failed to fetch user blogs' });
     }
 });
-
-// ✅ Public: Get blog by ID (must be after /user/:userId)
-router.get('/:id', blogController.getBlogById);
 
 // ✅ Protected: Create blog
 router.post('/', authMiddleware, async (req, res) => {
@@ -44,6 +47,7 @@ router.put('/:id', authMiddleware, blogController.updateBlog);
 router.delete('/:id', authMiddleware, blogController.deleteBlog);
 
 module.exports = router;
+
 
 
 
