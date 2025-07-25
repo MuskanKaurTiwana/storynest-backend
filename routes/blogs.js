@@ -1,11 +1,27 @@
-// routes/blog.js
 const express = require('express');
 const router = express.Router();
 const authMiddleware = require('../middleware/authMiddleware');
 const blogController = require('../controllers/blogController');
 const Blog = require('../models/Blog');
 
-// Create blog
+// ✅ Public: Get all blogs
+router.get('/', blogController.getAllBlogs);
+
+// ✅ Public: Get blog by ID
+router.get('/:id', blogController.getBlogById);
+
+// ✅ Public: Get blogs by user ID
+router.get('/user/:userId', async (req, res) => {
+    try {
+        const blogs = await Blog.find({ author: req.params.userId });
+        res.json(blogs);
+    } catch (err) {
+        console.error('Error fetching user blogs:', err);
+        res.status(500).json({ error: 'Failed to fetch user blogs' });
+    }
+});
+
+// ✅ Protected: Create blog
 router.post('/', authMiddleware, async (req, res) => {
     try {
         const { title, content } = req.body;
@@ -21,25 +37,14 @@ router.post('/', authMiddleware, async (req, res) => {
     }
 });
 
-router.get('/', blogController.getAllBlogs);
-
-// ✅ Updated: Protect get-by-id route
-router.get('/:id', blogController.getBlogById);
-
+// ✅ Protected: Update blog
 router.put('/:id', authMiddleware, blogController.updateBlog);
+
+// ✅ Protected: Delete blog
 router.delete('/:id', authMiddleware, blogController.deleteBlog);
 
-router.get('/user/:userId', async (req, res) => {
-    try {
-        const blogs = await Blog.find({ author: req.params.userId });
-        res.json(blogs);
-    } catch (err) {
-        console.error('Error fetching user blogs:', err);
-        res.status(500).json({ error: 'Failed to fetch user blogs' });
-    }
-});
-
 module.exports = router;
+
 
 
 
