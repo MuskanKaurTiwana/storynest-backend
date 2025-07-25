@@ -1,16 +1,17 @@
 const Blog = require('../models/Blog');
 
-// Public - Get all blogs
+// ✅ Public: Get all blogs
 exports.getAllBlogs = async (req, res) => {
     try {
         const blogs = await Blog.find().populate('author', 'username');
         res.json(blogs);
     } catch (error) {
+        console.error("Error getting blogs:", error);
         res.status(500).json({ message: "Server Error" });
     }
 };
 
-// ✅ Public - Get blog by ID (for viewing)
+// ✅ Public: Get blog by ID (for viewing by anyone)
 exports.getBlogById = async (req, res) => {
     try {
         const blog = await Blog.findById(req.params.id).populate('author', 'username').lean();
@@ -22,7 +23,7 @@ exports.getBlogById = async (req, res) => {
     }
 };
 
-// ✅ Protected - Get blog by ID (for editing)
+// ✅ Protected: Get blog by ID for editing (only for author)
 exports.getBlogForEdit = async (req, res) => {
     try {
         const blog = await Blog.findById(req.params.id).populate('author', 'username').lean();
@@ -35,11 +36,11 @@ exports.getBlogForEdit = async (req, res) => {
         res.json(blog);
     } catch (error) {
         console.error("Error fetching blog for edit:", error);
-        res.status(500).json({ message: 'Error fetching blog' });
+        res.status(500).json({ message: 'Error fetching blog for edit' });
     }
 };
 
-// Update blog
+// ✅ Update blog
 exports.updateBlog = async (req, res) => {
     const { title, content } = req.body;
     try {
@@ -55,12 +56,12 @@ exports.updateBlog = async (req, res) => {
         const updatedBlog = await blog.save();
         res.json(updatedBlog);
     } catch (error) {
-        console.error(error);
+        console.error("Error updating blog:", error);
         res.status(500).json({ message: "Server Error" });
     }
 };
 
-// Delete blog
+// ✅ Delete blog
 exports.deleteBlog = async (req, res) => {
     try {
         const blog = await Blog.findById(req.params.id);
@@ -73,9 +74,22 @@ exports.deleteBlog = async (req, res) => {
         await blog.deleteOne();
         res.json({ message: "Blog deleted successfully" });
     } catch (error) {
+        console.error("Error deleting blog:", error);
         res.status(500).json({ message: "Server Error" });
     }
 };
+
+// ✅ Public: Get blogs by user ID
+exports.getBlogsByUser = async (req, res) => {
+    try {
+        const blogs = await Blog.find({ author: req.params.userId });
+        res.json(blogs);
+    } catch (err) {
+        console.error('Error fetching user blogs:', err);
+        res.status(500).json({ error: 'Failed to fetch user blogs' });
+    }
+};
+
 
 
 
