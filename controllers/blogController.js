@@ -1,7 +1,6 @@
-// controllers/blogController.js
 const Blog = require('../models/Blog');
 
-// Get all blogs (public)
+// Public - Get all blogs
 exports.getAllBlogs = async (req, res) => {
     try {
         const blogs = await Blog.find().populate('author', 'username');
@@ -11,17 +10,11 @@ exports.getAllBlogs = async (req, res) => {
     }
 };
 
-// ✅ Updated: Protected get-by-id for edit page
+// ✅ Public - Get blog by ID (for viewing)
 exports.getBlogById = async (req, res) => {
     try {
         const blog = await Blog.findById(req.params.id).populate('author', 'username').lean();
         if (!blog) return res.status(404).json({ message: 'Blog not found' });
-
-        // ✅ Only allow author to fetch blog for editing
-        if (blog.author._id.toString() !== req.userId) {
-            return res.status(403).json({ message: 'Unauthorized access to blog' });
-        }
-
         res.json(blog);
     } catch (error) {
         console.error("Error fetching blog:", error);
@@ -29,7 +22,24 @@ exports.getBlogById = async (req, res) => {
     }
 };
 
-// Update blog (already correct)
+// ✅ Protected - Get blog by ID (for editing)
+exports.getBlogForEdit = async (req, res) => {
+    try {
+        const blog = await Blog.findById(req.params.id).populate('author', 'username').lean();
+        if (!blog) return res.status(404).json({ message: 'Blog not found' });
+
+        if (blog.author._id.toString() !== req.userId) {
+            return res.status(403).json({ message: 'Unauthorized access to edit' });
+        }
+
+        res.json(blog);
+    } catch (error) {
+        console.error("Error fetching blog for edit:", error);
+        res.status(500).json({ message: 'Error fetching blog' });
+    }
+};
+
+// Update blog
 exports.updateBlog = async (req, res) => {
     const { title, content } = req.body;
     try {
@@ -50,6 +60,7 @@ exports.updateBlog = async (req, res) => {
     }
 };
 
+// Delete blog
 exports.deleteBlog = async (req, res) => {
     try {
         const blog = await Blog.findById(req.params.id);
@@ -65,5 +76,6 @@ exports.deleteBlog = async (req, res) => {
         res.status(500).json({ message: "Server Error" });
     }
 };
+
 
 
