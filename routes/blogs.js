@@ -2,27 +2,18 @@ const express = require('express');
 const router = express.Router();
 const authMiddleware = require('../middleware/authMiddleware');
 const blogController = require('../controllers/blogController');
-const Blog = require('../models/Blog');
 
 // ✅ Public: Get all blogs
 router.get('/', blogController.getAllBlogs);
 
-// ✅ Public: Get blog by ID for viewing
+// ✅ Public: Get blogs by user ID
+router.get('/user/:userId', blogController.getBlogsByUser);
+
+// ✅ Public: Get blog by ID for anyone (used on blog detail page)
 router.get('/:id', blogController.getBlogById);
 
-// ✅ Protected: Get blog by ID for editing
-router.get('/edit/:id', authMiddleware, blogController.getBlogForEdit);
-
-// ✅ Public: Get blogs by user ID (must be placed before routes with params like /:id)
-router.get('/user/:userId', async (req, res) => {
-    try {
-        const blogs = await Blog.find({ author: req.params.userId });
-        res.json(blogs);
-    } catch (err) {
-        console.error('Error fetching user blogs:', err);
-        res.status(500).json({ error: 'Failed to fetch user blogs' });
-    }
-});
+// ✅ Protected: Get blog by ID only for editing by owner
+router.get('/:id/edit', authMiddleware, blogController.getBlogForEdit);
 
 // ✅ Protected: Create blog
 router.post('/', authMiddleware, async (req, res) => {
@@ -36,6 +27,7 @@ router.post('/', authMiddleware, async (req, res) => {
         const savedBlog = await newBlog.save();
         res.status(201).json(savedBlog);
     } catch (error) {
+        console.error("Error creating blog:", error);
         res.status(500).json({ message: "Failed to create blog" });
     }
 });
@@ -47,6 +39,7 @@ router.put('/:id', authMiddleware, blogController.updateBlog);
 router.delete('/:id', authMiddleware, blogController.deleteBlog);
 
 module.exports = router;
+
 
 
 
